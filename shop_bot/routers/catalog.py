@@ -62,7 +62,7 @@ async def render_catalog(page=0):
     if not rows:
         text = ("🛍 <b>Каталог</b>\n\n😔 Товаров пока нет — каталог склада пополняется. "
                 "Загляните позже.")
-        return text, kb([("ℹ️ О магазине", "cb_about")], [("⬅️ В меню", "menu")])
+        return text, kb([("⬅️ В меню", "menu")])
     total = len(rows)
     pages = max(1, (total + CATS_PER_PAGE - 1) // CATS_PER_PAGE)
     page = min(max(page, 0), pages - 1)
@@ -73,7 +73,7 @@ async def render_catalog(page=0):
         f"🛍 <b>Каталог {esc(SHOP_NAME)}</b>{suffix}\n\n"
         f"{preview}\n\n"
         "Выберите категорию на кнопках ниже.")
-    tail = [[("⬅️ В меню", "menu")], [("ℹ️ О магазине", "cb_about")]]
+    tail = [[("⬅️ В меню", "menu")]]
     return text, _cats_kb(chunk, page, pages, tail)
 
 

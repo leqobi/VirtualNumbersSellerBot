@@ -1,7 +1,7 @@
 """EXAMPLE SPLIT: /start, главное меню, навигация, профиль пользователя.
 
 Главное меню — reply-клавиатура (текстовое меню Telegram):
-  🛍 Каталог · 📦 Мои заказы · 💳 Оплата · 👤 Профиль · 📞 Поддержка · ℹ️ О магазине
+  🛍 Каталог · 📦 Мои заказы · 💳 Оплата · 👤 Профиль · 📞 Поддержка
 """
 
 from __future__ import annotations
@@ -22,7 +22,6 @@ MENU_ORDERS = "📦 Мои заказы"
 MENU_PAY = "💳 Оплата"
 MENU_PROFILE = "👤 Профиль"
 MENU_SUPPORT = "📞 Поддержка"
-MENU_ABOUT = "ℹ️ О магазине"
 
 MENU_TEXT = "Выберите раздел"
 
@@ -32,7 +31,6 @@ def main_menu_kb() -> ReplyKeyboardMarkup:
         [KeyboardButton(text=MENU_CATALOG)],
         [KeyboardButton(text=MENU_ORDERS), KeyboardButton(text=MENU_PAY)],
         [KeyboardButton(text=MENU_PROFILE), KeyboardButton(text=MENU_SUPPORT)],
-        [KeyboardButton(text=MENU_ABOUT)],
     ]
     return ReplyKeyboardMarkup(
         keyboard=rows, resize_keyboard=True, input_field_placeholder="Выберите раздел…")
@@ -77,7 +75,7 @@ async def menu_cmd(m: Message, state: FSMContext):
 async def menu_cb(c: CallbackQuery, state: FSMContext):
     """Inline «В меню» внутри новых разделов; данные совпадают со старыми кнопками."""
     await state.clear()
-    await show(c, MENU_TEXT, kb([("ℹ️ О магазине", "cb_about")], [("🛍 Каталог", "cat")]))
+    await show(c, MENU_TEXT, kb([("🛍 Каталог", "cat")]))
 
 
 # ---------------- разделы главного меню (reply-кнопки) ----------------
@@ -114,22 +112,6 @@ async def menu_support(m: Message, state: FSMContext):
     await state.clear()
     from .support import start_contact_reply
     await start_contact_reply(m, state)
-
-
-@r.message(F.text == MENU_ABOUT)
-async def menu_about(m: Message, state: FSMContext):
-    await state.clear()
-    about = await db.settings_get("about_text")
-    await m.answer(
-        f"ℹ️ <b>{esc(SHOP_NAME)}</b>\n\n{esc(about)}",
-        reply_markup=kb([("📞 Поддержка", "cb_contact")], [("⬅️ В меню", "menu")]))
-
-
-@r.callback_query(F.data == "cb_about")
-async def cb_about(c: CallbackQuery):
-    about = await db.settings_get("about_text")
-    await show(c, f"ℹ️ <b>{esc(SHOP_NAME)}</b>\n\n{esc(about)}",
-               kb([("📞 Поддержка", "cb_contact")], [("⬅️ В меню", "menu")]))
 
 
 # ---------------- профиль ----------------
