@@ -12,7 +12,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, InlineKeyboardMarkup, KeyboardButton, Message, ReplyKeyboardMarkup
 
 from .. import db, services
-from ..config import DEFAULT_SETTINGS, PAID_STATUSES, SHOP_NAME
+from ..config import PAID_STATUSES, SHOP_NAME
 from ..helpers import balance_text, esc, fmt_ts, kb, money, rub_money, show
 
 r = Router(name="common")
@@ -24,6 +24,7 @@ MENU_PROFILE = "👤 Профиль"
 MENU_SUPPORT = "📞 Поддержка"
 
 MENU_TEXT = "Выберите раздел"
+START_WELCOME_TEXT = "Добро пожаловать в Example Split! 👋"
 
 
 def main_menu_kb() -> ReplyKeyboardMarkup:
@@ -50,13 +51,7 @@ async def start(m: Message, state: FSMContext):
         "INSERT INTO users(id, username, name, joined, last_active) VALUES($1,$2,$3,$4,$4) "
         "ON CONFLICT (id) DO UPDATE SET username=$2, name=$3",
         u.id, u.username, u.full_name, ts)
-    welcome = await db.settings_get("welcome_text", DEFAULT_SETTINGS["welcome_text"])
-    # Replace persisted greetings from the previous virtual-number shop.
-    legacy_terms = ("виртуальн", "sms", "смс", "активац", "аренд", "код подтверж")
-    if any(term in welcome.casefold() for term in legacy_terms):
-        welcome = DEFAULT_SETTINGS["welcome_text"]
-        await db.settings_set("welcome_text", welcome)
-    await m.answer(esc(welcome), reply_markup=main_menu_kb())
+    await m.answer(START_WELCOME_TEXT, reply_markup=main_menu_kb())
 
 
 @r.message(Command("cancel"))
